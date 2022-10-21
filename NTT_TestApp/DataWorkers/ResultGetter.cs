@@ -1,6 +1,8 @@
 ﻿using NTT_TestApp.Interfaces;
 using NTT_TestApp.Model;
+using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NTT_TestApp.DataWorkers
@@ -19,12 +21,29 @@ namespace NTT_TestApp.DataWorkers
             ConnectDB();
         }
 
-        private async void ConnectDB()
+        private async Task ConnectDB()
         {
             Gui.StartLoading();
             await Task.Run(() =>
             {
-                var Products = dataLoader.LoadProducts();
+                int triesCount = 0;
+                bool connected = false;
+                while (!connected && triesCount < 3)
+                {
+                    try
+                    {
+                        var Products = dataLoader.LoadProducts();
+                        connected = true;
+                    }
+                    catch (Exception)
+                    {
+                        triesCount++;
+                    }
+                }
+                if(triesCount >= 3)
+                {
+                    throw new Exception("Превышено время ожидания подключения к базе данных!");
+                }
             });
             Gui.StopLoading();
         }

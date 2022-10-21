@@ -8,7 +8,7 @@ namespace NTT_TestApp
 {
     public partial class MainWindow : Window
     {
-        private readonly ResultGetter? _resultGetter;
+        private readonly ResultGetter _resultGetter;
 
         public MainWindow()
         {
@@ -21,6 +21,7 @@ namespace NTT_TestApp
             catch (Exception ex)
             {
                 MessageBox.Show("Возникла ошибка:\n" + ex.Message);
+                this.Close();
             }
         }
 
