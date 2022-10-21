@@ -24,7 +24,7 @@ namespace NTT_TestApp.Core
             base.OnModelCreating(modelBuilder);
         }
 
-        public DataContext() : base(@"Data Source=Kirl\SQLEXPRESS;Database=ProductCatalog;Trusted_Connection=True;Connect Timeout=5;")
+        public DataContext() : base(@"Data Source=.\SQLEXPRESS;Database=ProductCatalog;Trusted_Connection=True;Connect Timeout=1;")
         {
         }
     }

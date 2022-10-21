@@ -2,6 +2,7 @@
 using NTT_TestApp.GraphicInterfaces;
 using NTT_TestApp.Interfaces;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace NTT_TestApp
@@ -9,29 +10,24 @@ namespace NTT_TestApp
     public partial class MainWindow : Window
     {
         private readonly ResultGetter _resultGetter;
+        private readonly IGui Gui;
 
         public MainWindow()
         {
-            try
-            {
-                InitializeComponent();
-                IGui Gui = new MyWpfGui(this);
-                _resultGetter = new(Gui);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Возникла ошибка:\n" + ex.Message);
-                this.Close();
-            }
+            InitializeComponent();
+            Gui = new MyWpfGui(this);
+            _resultGetter = new(Gui);
+            Gui.StartLoading();
+            Task.Run(() => TryConnect(this));
         }
 
         private void ShowProducts(object sender, RoutedEventArgs e)
         {
             try
             {
-                _resultGetter?.ShowProducts();
+                _resultGetter.ShowProducts();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Возникла ошибка:\n" + ex.Message);
             }
@@ -41,7 +37,7 @@ namespace NTT_TestApp
         {
             try
             {
-                _resultGetter?.ShowProductsOrder();
+                _resultGetter.ShowProductsOrder();
             }
             catch (Exception ex)
             {
@@ -53,11 +49,31 @@ namespace NTT_TestApp
         {
             try
             {
-                _resultGetter?.ShowCategories();
+                _resultGetter.ShowCategories();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Возникла ошибка:\n" + ex.Message);
+            }
+        }
+
+        private async Task TryConnect(MainWindow mainWindow)
+        {
+            try
+            {
+                await _resultGetter.ConnectDB();
+                mainWindow.Dispatcher.Invoke(() =>
+                {
+                    mainWindow.Gui.StopLoading();
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Возникла ошибка:\n" + ex.Message);
+                mainWindow.Dispatcher.Invoke(() =>
+                {
+                    mainWindow.Close();
+                });
             }
         }
     }

@@ -18,34 +18,28 @@ namespace NTT_TestApp.DataWorkers
         public ResultGetter(IGui gui)
         {
             Gui = gui;
-            ConnectDB();
         }
 
-        private async Task ConnectDB()
+        public async Task ConnectDB()
         {
-            Gui.StartLoading();
-            await Task.Run(() =>
+            int triesCount = 0;
+            bool connected = false;
+            while (!connected && triesCount < 3)
             {
-                int triesCount = 0;
-                bool connected = false;
-                while (!connected && triesCount < 3)
+                try
                 {
-                    try
-                    {
-                        var Products = dataLoader.LoadProducts();
-                        connected = true;
-                    }
-                    catch (Exception)
-                    {
-                        triesCount++;
-                    }
+                    var Products = dataLoader.LoadProducts();
+                    connected = true;
                 }
-                if(triesCount >= 3)
+                catch (Exception)
                 {
-                    throw new Exception("Превышено время ожидания подключения к базе данных!");
+                    triesCount++;
                 }
-            });
-            Gui.StopLoading();
+            }
+            if (triesCount >= 3)
+            {
+                throw new Exception("Превышено время ожидания подключения к базе данных!");
+            }
         }
 
         public async void ShowProducts()
